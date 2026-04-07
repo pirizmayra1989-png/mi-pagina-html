@@ -1,0 +1,374 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .app { max-width: 700px; margin: 0 auto; padding: 1rem; }
+  .header { text-align: center; padding: 1.5rem 1rem; margin-bottom: 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .header h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .header p { font-size: 14px; color: var(--color-text-secondary); }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .nav-btn { padding: 8px 16px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .nav-btn.active { background: #3C3489; border-color: #3C3489; color: #EEEDFE; }
+  .nav-btn:hover:not(.active) { background: var(--color-background-secondary); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .card h2 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+  .card p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 8px; }
+  .card p:last-child { margin-bottom: 0; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; margin-bottom: 8px; }
+  .badge-purple { background: #EEEDFE; color: #3C3489; }
+  .badge-teal { background: #E1F5EE; color: #0F6E56; }
+  .badge-amber { background: #FAEEDA; color: #854F0B; }
+  .example-box { background: var(--color-background-secondary); border-radius: 8px; padding: 12px; margin: 10px 0; font-size: 14px; }
+  .example-box span { font-weight: 500; color: #3C3489; }
+  .pronoun-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+  .pronoun-card { background: #EEEDFE; border-radius: 8px; padding: 10px; text-align: center; }
+  .pronoun-card .pronoun { font-size: 18px; font-weight: 500; color: #3C3489; }
+  .pronoun-card .usage { font-size: 11px; color: #534AB7; margin-top: 2px; }
+  .quiz-q { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+  .quiz-img { font-size: 40px; margin-bottom: 10px; text-align: center; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt-btn { padding: 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 8px; background: var(--color-background-primary); color: var(--color-text-primary); font-size: 14px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .opt-btn:hover { background: var(--color-background-secondary); }
+  .opt-btn.correct { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+  .opt-btn.wrong { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+  .feedback { text-align: center; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; font-weight: 500; display: none; }
+  .feedback.show { display: block; }
+  .feedback.good { background: #EAF3DE; color: #27500A; }
+  .feedback.bad { background: #FCEBEB; color: #501313; }
+  .next-btn { width: 100%; margin-top: 12px; padding: 10px; border-radius: 8px; border: 0.5px solid #534AB7; background: transparent; color: #534AB7; font-size: 14px; cursor: pointer; font-weight: 500; }
+  .next-btn:hover { background: #EEEDFE; }
+  .score-bar { background: var(--color-background-secondary); border-radius: 20px; height: 8px; margin: 10px 0; overflow: hidden; }
+  .score-fill { height: 100%; background: #1D9E75; border-radius: 20px; transition: width 0.5s; }
+  .score-text { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .flag { font-size: 28px; }
+  .match-game { }
+  .match-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .match-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .match-select { flex: 2; padding: 8px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 13px; width: 100%; }
+  .check-btn { width: 100%; padding: 10px; border-radius: 8px; border: 0.5px solid #185FA5; background: transparent; color: #185FA5; font-weight: 500; font-size: 14px; cursor: pointer; margin-top: 8px; }
+  .check-btn:hover { background: #E6F1FB; }
+  .fill-input { border: 0.5px solid var(--color-border-secondary); border-radius: 6px; background: var(--color-background-primary); color: var(--color-text-primary); font-size: 14px; padding: 4px 8px; width: 130px; }
+  .sentence-fill { font-size: 14px; color: var(--color-text-primary); margin-bottom: 10px; line-height: 2; }
+  .progress { display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; }
+  .progress-step { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+  .progress-step.done { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+  .progress-step.active { background: #EEEDFE; border-color: #534AB7; color: #3C3489; }
+  .progress-line { flex: 1; height: 1px; background: var(--color-border-tertiary); }
+  .celebration { text-align: center; padding: 1.5rem; }
+  .celebration .big { font-size: 48px; margin-bottom: 12px; }
+  .celebration h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+  .celebration p { font-size: 14px; color: var(--color-text-secondary); }
+  .restart-btn { margin-top: 16px; padding: 10px 24px; border-radius: 20px; border: 0.5px solid #534AB7; background: transparent; color: #534AB7; font-size: 14px; cursor: pointer; font-weight: 500; }
+</style>
+
+<div class="app">
+  <div class="header">
+    <h1>🌍 Countries & Grammar</h1>
+    <p>Learn, practice, and play! Level A1 English</p>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('learn')">📖 Learn</button>
+    <button class="nav-btn" onclick="showSection('quiz')">🧠 Quiz</button>
+    <button class="nav-btn" onclick="showSection('fill')">✏️ Fill in</button>
+    <button class="nav-btn" onclick="showSection('match')">🎯 Match</button>
+    <button class="nav-btn" onclick="showSection('crossword')">🔠 Crossword</button>
+  </div>
+
+  <div id="learn" class="section active">
+    <div class="card">
+      <div class="badge badge-purple">Vocabulary</div>
+      <h2>Countries & Cities</h2>
+      <p>We use city names to talk about where people are from, then say the country:</p>
+      <div class="example-box">She's from Zurich. She's from <span>Switzerland</span>.</div>
+      <div class="example-box">He's from Paris. He's from <span>France</span>.</div>
+      <div class="example-box">I'm from Rome. I'm from <span>Italy</span>.</div>
+      <div class="example-box">You're from Miami. You're from the <span>United States</span>.</div>
+      <div class="example-box">She's from Moscow. She's from <span>Russia</span>.</div>
+      <div class="example-box">He's from Istanbul. He's from <span>Turkey</span>.</div>
+      <div class="example-box">I'm from Warsaw. I'm from <span>Poland</span>.</div>
+      <div class="example-box">You're from Cairo. You're from <span>Egypt</span>.</div>
+      <div class="example-box">She's from Berlin. She's from <span>Germany</span>.</div>
+    </div>
+    <div class="card">
+      <div class="badge badge-teal">Grammar</div>
+      <h2>Verb "be" — he, she, it</h2>
+      <p>Use <strong>He's / She's / It's</strong> for singular subjects:</p>
+      <div class="pronoun-grid">
+        <div class="pronoun-card"><div class="pronoun">She's</div><div class="usage">for women / girls</div></div>
+        <div class="pronoun-card"><div class="pronoun">He's</div><div class="usage">for men / boys</div></div>
+        <div class="pronoun-card"><div class="pronoun">It's</div><div class="usage">for things / places</div></div>
+      </div>
+      <div class="example-box"><span>She's</span> from the United States. (a woman)</div>
+      <div class="example-box"><span>It's</span> from China. (an object)</div>
+      <div class="example-box"><span>He's</span> from Germany. (a man)</div>
+    </div>
+    <div class="card">
+      <div class="badge badge-amber">Grammar</div>
+      <h2>Is / Isn't — questions & negatives</h2>
+      <div class="example-box">Is Paulo from Spain? — No, he <span>isn't</span>. He <span>is</span> from Brazil.</div>
+      <div class="example-box">Where <span>is</span> Oaxaca? <span>Is</span> it in Mexico? — Yes, it <span>is</span>.</div>
+      <div class="example-box"><span>Is</span> Robert Downey Jr from the USA? — Yes, he <span>is</span>. He's from New York.</div>
+      <div class="example-box"><span>Is</span> Kobe in China? — No, it <span>isn't</span>. It's in Japan.</div>
+    </div>
+  </div>
+
+  <div id="quiz" class="section">
+    <div class="card">
+      <div id="score-text" class="score-text">Score: 0 / 0</div>
+      <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+      <div id="quiz-inner"></div>
+    </div>
+  </div>
+
+  <div id="fill" class="section">
+    <div class="card">
+      <div class="badge badge-teal">Exercise</div>
+      <h2>Complete the sentences</h2>
+      <p style="margin-bottom:14px;">Fill in the blanks with the correct country or pronoun.</p>
+      <div id="fill-form"></div>
+      <button class="check-btn" onclick="checkFill()">Check answers</button>
+      <div id="fill-feedback" class="feedback"></div>
+    </div>
+  </div>
+
+  <div id="match" class="section">
+    <div class="card">
+      <div class="badge badge-purple">Game</div>
+      <h2>Match city to country</h2>
+      <p style="margin-bottom:14px;">Select the correct country for each city!</p>
+      <div id="match-form"></div>
+      <button class="check-btn" onclick="checkMatch()">Check!</button>
+      <div id="match-feedback" class="feedback"></div>
+    </div>
+  </div>
+
+  <div id="crossword" class="section">
+    <div class="card">
+      <div class="badge badge-amber">Crossword</div>
+      <h2>Mini crossword — countries</h2>
+      <p style="margin-bottom: 12px;">Use the clues to write the countries. Type one letter per box.</p>
+      <div id="cw-grid"></div>
+      <div style="margin-top:16px; font-size:13px; color:var(--color-text-secondary);">
+        <strong style="color:var(--color-text-primary);">Clues across →</strong><br>
+        1. Pyramids are here (5 letters)<br>
+        2. Warsaw is the capital (6 letters)<br>
+        3. Berlin is the capital (7 letters)<br><br>
+        <strong style="color:var(--color-text-primary);">Clues down ↓</strong><br>
+        4. Moscow is the capital (6 letters)<br>
+        5. Istanbul is the city, not the capital (6 letters)<br>
+      </div>
+      <button class="check-btn" style="margin-top:12px;" onclick="checkCW()">Check crossword</button>
+      <div id="cw-feedback" class="feedback"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'quiz' && !quizStarted) initQuiz();
+  if (id === 'fill' && !fillStarted) initFill();
+  if (id === 'match' && !matchStarted) initMatch();
+  if (id === 'crossword' && !cwStarted) initCW();
+}
+
+const quizData = [
+  { q: "She's from Moscow. She's from…", emoji: "🏙️", opts: ["Russia", "Poland", "Germany", "Turkey"], ans: "Russia" },
+  { q: "He's from Istanbul. He's from…", emoji: "🕌", opts: ["Egypt", "Turkey", "Italy", "Russia"], ans: "Turkey" },
+  { q: "She's from Berlin. She's from…", emoji: "🏛️", opts: ["France", "Germany", "Poland", "Switzerland"], ans: "Germany" },
+  { q: "I'm from Warsaw. I'm from…", emoji: "🏰", opts: ["Poland", "Germany", "Turkey", "France"], ans: "Poland" },
+  { q: "You're from Cairo. You're from…", emoji: "🔺", opts: ["Turkey", "Russia", "Egypt", "Italy"], ans: "Egypt" },
+  { q: "A woman is from the United States. Which pronoun?", emoji: "👩", opts: ["He's", "It's", "She's", "They're"], ans: "She's" },
+  { q: "A man is from Germany. Which pronoun?", emoji: "👨", opts: ["She's", "It's", "He's", "They're"], ans: "He's" },
+  { q: "A flag is from China. Which pronoun?", emoji: "🚩", opts: ["He's", "She's", "It's", "We're"], ans: "It's" },
+  { q: "Is Paulo from Spain? No, he ___ from Spain.", emoji: "🤔", opts: ["is", "isn't", "are", "aren't"], ans: "isn't" },
+  { q: "Is Kobe in China? No, it ___. It's in Japan.", emoji: "🗾", opts: ["is", "are", "isn't", "aren't"], ans: "isn't" },
+];
+let qi = 0, score = 0, answered = false, quizStarted = false;
+function initQuiz() {
+  quizStarted = true;
+  qi = 0; score = 0;
+  renderQuiz();
+}
+function renderQuiz() {
+  if (qi >= quizData.length) {
+    document.getElementById('quiz-inner').innerHTML = `<div class="celebration"><div class="big">${score >= 8 ? '🎉' : score >= 5 ? '👍' : '📚'}</div><h2>${score >= 8 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep practicing!'}</h2><p>You got <strong>${score}</strong> out of <strong>${quizData.length}</strong> correct.</p><button class="restart-btn" onclick="restartQuiz()">Play again</button></div>`;
+    return;
+  }
+  const d = quizData[qi];
+  document.getElementById('score-text').textContent = `Question ${qi+1} / ${quizData.length} — Score: ${score}`;
+  document.getElementById('score-fill').style.width = ((score/quizData.length)*100) + '%';
+  answered = false;
+  document.getElementById('quiz-inner').innerHTML = `
+    <div class="quiz-img">${d.emoji}</div>
+    <div class="quiz-q">${d.q}</div>
+    <div class="options">${d.opts.map(o => `<button class="opt-btn" onclick="pickAns(this,'${o}','${d.ans}')">${o}</button>`).join('')}</div>
+    <div class="feedback" id="qfb"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQ()" style="display:none">Next →</button>
+  `;
+}
+function pickAns(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+  const fb = document.getElementById('qfb');
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    fb.textContent = '✅ Correct! Well done!';
+    fb.className = 'feedback show good';
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    fb.textContent = `❌ The correct answer is: ${correct}`;
+    fb.className = 'feedback show bad';
+  }
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('score-text').textContent = `Question ${qi+1} / ${quizData.length} — Score: ${score}`;
+  document.getElementById('score-fill').style.width = ((score/quizData.length)*100) + '%';
+}
+function nextQ() { qi++; renderQuiz(); }
+function restartQuiz() { qi = 0; score = 0; renderQuiz(); }
+
+const fillData = [
+  { sentence: "She's from Paris. She's from ", blank: "France", after: "." },
+  { sentence: "He's from Rome. He's from ", blank: "Italy", after: "." },
+  { sentence: "You're from Miami. You're from the ", blank: "United States", after: "." },
+  { sentence: "She's from Moscow. She's from ", blank: "Russia", after: "." },
+  { sentence: "He's from Istanbul. He's from ", blank: "Turkey", after: "." },
+  { sentence: "I'm from Warsaw. I'm from ", blank: "Poland", after: "." },
+  { sentence: "She's from Berlin. She's from ", blank: "Germany", after: "." },
+  { sentence: "A woman → ", blank: "She's", after: " from Japan." },
+  { sentence: "A man → ", blank: "He's", after: " from Mexico." },
+  { sentence: "A place → ", blank: "It's", after: " in Egypt." },
+];
+let fillStarted = false;
+function initFill() {
+  fillStarted = true;
+  const form = document.getElementById('fill-form');
+  form.innerHTML = fillData.map((d, i) => `
+    <div class="sentence-fill">
+      ${i+1}. ${d.sentence}<input class="fill-input" id="fi${i}" placeholder="…">${d.after}
+    </div>`).join('');
+}
+function checkFill() {
+  let correct = 0;
+  fillData.forEach((d, i) => {
+    const val = document.getElementById('fi'+i).value.trim();
+    if (val.toLowerCase() === d.blank.toLowerCase()) {
+      document.getElementById('fi'+i).style.borderColor = '#3B6D11';
+      document.getElementById('fi'+i).style.background = '#EAF3DE';
+      correct++;
+    } else {
+      document.getElementById('fi'+i).style.borderColor = '#A32D2D';
+      document.getElementById('fi'+i).style.background = '#FCEBEB';
+      document.getElementById('fi'+i).value = d.blank;
+    }
+  });
+  const fb = document.getElementById('fill-feedback');
+  fb.textContent = correct === fillData.length ? `🎉 Perfect! All ${fillData.length} correct!` : `You got ${correct} / ${fillData.length}. Check the highlighted answers!`;
+  fb.className = 'feedback show ' + (correct === fillData.length ? 'good' : 'bad');
+}
+
+const matchData = [
+  { city: "Zurich", country: "Switzerland" },
+  { city: "Paris", country: "France" },
+  { city: "Rome", country: "Italy" },
+  { city: "Cairo", country: "Egypt" },
+  { city: "Moscow", country: "Russia" },
+  { city: "Istanbul", country: "Turkey" },
+  { city: "Warsaw", country: "Poland" },
+  { city: "Berlin", country: "Germany" },
+];
+let matchStarted = false;
+function initMatch() {
+  matchStarted = true;
+  const countries = [...matchData.map(d => d.country)].sort(() => Math.random()-0.5);
+  const form = document.getElementById('match-form');
+  form.innerHTML = matchData.map((d, i) => `
+    <div class="match-row">
+      <div class="match-label">🏙️ ${d.city}</div>
+      <select class="match-select" id="ms${i}">
+        <option value="">— select country —</option>
+        ${countries.map(c => `<option value="${c}">${c}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+function checkMatch() {
+  let correct = 0;
+  matchData.forEach((d, i) => {
+    const sel = document.getElementById('ms'+i);
+    if (sel.value === d.country) { sel.style.borderColor = '#3B6D11'; sel.style.background = '#EAF3DE'; correct++; }
+    else { sel.style.borderColor = '#A32D2D'; sel.style.background = '#FCEBEB'; sel.value = d.country; }
+  });
+  const fb = document.getElementById('match-feedback');
+  fb.textContent = correct === matchData.length ? '🎉 Perfect match! All correct!' : `${correct} / ${matchData.length} correct. Answers filled in for you!`;
+  fb.className = 'feedback show ' + (correct === matchData.length ? 'good' : 'bad');
+}
+
+const cwWords = {
+  across: [
+    { row: 0, col: 0, word: "EGYPT", clue: "1" },
+    { row: 2, col: 0, word: "POLAND", clue: "2" },
+    { row: 4, col: 0, word: "GERMANY", clue: "3" },
+  ],
+  down: [
+    { row: 0, col: 0, word: "RUSSIA", clue: "4" },
+    { row: 0, col: 4, word: "TURKEY", clue: "5" },
+  ]
+};
+let cwStarted = false;
+const ROWS = 6, COLS = 7;
+let grid = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+let answers = Array.from({length: ROWS}, () => Array(COLS).fill(''));
+function initCW() {
+  cwStarted = true;
+  cwWords.across.forEach(w => {
+    for (let i = 0; i < w.word.length; i++) grid[w.row][w.col+i] = w.word[i];
+  });
+  cwWords.down.forEach(w => {
+    for (let i = 0; i < w.word.length; i++) { if (!grid[w.row+i]) grid[w.row+i] = Array(COLS).fill(null); grid[w.row+i][w.col] = w.word[i]; }
+  });
+  const labels = {[0*COLS+0]: '1/4', [2*COLS+0]: '2', [4*COLS+0]: '3', [0*COLS+4]: '5'};
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,38px);gap:3px;">';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const key = r*COLS+c;
+      if (grid[r][c]) {
+        const lbl = labels[key] ? `<span style="position:absolute;top:1px;left:2px;font-size:9px;color:#534AB7;">${labels[key]}</span>` : '';
+        html += `<div style="position:relative;"><input maxlength="1" id="cw${r}_${c}" oninput="cwInput(this,${r},${c})" style="width:36px;height:36px;text-align:center;text-transform:uppercase;font-size:15px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:var(--color-background-primary);color:var(--color-text-primary);">${lbl}</div>`;
+      } else {
+        html += `<div style="width:36px;height:36px;background:var(--color-background-secondary);border-radius:6px;"></div>`;
+      }
+    }
+  }
+  html += '</div>';
+  document.getElementById('cw-grid').innerHTML = html;
+}
+function cwInput(el, r, c) {
+  el.value = el.value.toUpperCase();
+  const next = document.getElementById(`cw${r}_${c+1}`) || document.getElementById(`cw${r+1}_0`);
+  if (el.value && next) next.focus();
+}
+function checkCW() {
+  let correct = 0, total = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (grid[r][c]) {
+        total++;
+        const el = document.getElementById(`cw${r}_${c}`);
+        if (el.value.toUpperCase() === grid[r][c]) { el.style.background='#EAF3DE'; el.style.borderColor='#3B6D11'; correct++; }
+        else { el.style.background='#FCEBEB'; el.style.borderColor='#A32D2D'; el.value = grid[r][c]; }
+      }
+    }
+  }
+  const fb = document.getElementById('cw-feedback');
+  fb.textContent = correct === total ? '🎉 Amazing! Crossword complete!' : `${correct}/${total} letters correct. Check the highlighted ones!`;
+  fb.className = 'feedback show ' + (correct === total ? 'good' : 'bad');
+}
+</script>
